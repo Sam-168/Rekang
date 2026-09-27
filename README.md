@@ -1,75 +1,101 @@
-# React + TypeScript + Vite
+# Rekang
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A mobile-first community marketplace connecting students, faculty, local vendors, and residents around a campus.
 
-Currently, two official plugins are available:
+Rekang lets people list, discover, and trade goods and services in one trusted place, with a community bulletin board for announcements and events layered on top.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech Stack
 
-## React Compiler
+- **Frontend:** React + TypeScript (Vite)
+- **Backend:** Supabase — Auth, Postgres database, Storage, Realtime, Edge Functions (no custom server)
+- **Hosting:** Vercel or Netlify (frontend), Supabase (backend)
+- **Payments:** PayFast / SnapScan (sandbox mode)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Core Features
 
-## Expanding the ESLint configuration
+- Multi-role accounts (student, vendor, resident/faculty, admin) with university-email verification
+- Product/service listings with search and filters
+- Cart and checkout
+- Reviews and ratings
+- Community bulletin board
+- Notifications
+- Reporting/flagging for trust & safety
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Prerequisites
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- [Node.js](https://nodejs.org/) (v18 or later)
+- A [Supabase](https://supabase.com/) account with access to the shared team project
+- [Git](https://git-scm.com/)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Installation
 
+```bash
+# Clone the repo
+git clone https://github.com/<your-org-or-username>/rekang.git
+cd rekang
+
+# Install dependencies
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+### Environment Variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Create a `.env` file in the project root (never commit this file):
 
 ```
+VITE_SUPABASE_URL=your-supabase-project-url
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+Ask the Supabase/Database team member for these values once you've been invited to the shared Supabase project.
+
+### Running Locally
+
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173` by default.
+
+## Project Structure
+
+```
+rekang/
+├── src/
+│   ├── components/     # Reusable UI components
+│   ├── pages/           # Screen-level components (Home, Listing Detail, Cart, etc.)
+│   ├── lib/              # Supabase client and helper functions
+│   ├── types/            # Shared TypeScript types/interfaces (e.g. Listing, Profile, Order)
+│   ├── App.tsx
+│   └── main.tsx
+├── public/
+├── .env.example
+├── .gitignore
+├── tsconfig.json
+└── package.json
+```
+
+## Team & Roles
+
+| Role | Responsibility |
+|---|---|
+| Project Manager | Timeline, stakeholder comms, deliverable docs, risk register |
+| Supabase/Database Engineer | Schema, RLS policies, auth config, storage, edge functions |
+| Frontend Developer — Core Marketplace | Listings, search, cart/checkout |
+| Frontend Developer — Community & UX | Bulletin board, notifications, reviews, UI/UX |
+| QA & Security Specialist | Testing, bug tracking, security checks, moderation |
+
+## Branching & Contributing
+
+- `main` is protected — no direct pushes.
+- Create a feature branch per issue: `git checkout -b feature/short-description`
+- Open a pull request into `main` and request at least one review before merging.
+- Reference the GitHub issue number in your PR description (e.g. `Closes #12`).
+
+## Deployment
+
+- Frontend deploys to Vercel/Netlify from `main`.
+- Backend is the shared Supabase project — no separate deployment step needed for backend logic beyond edge functions.
+
