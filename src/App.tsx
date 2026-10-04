@@ -24,6 +24,7 @@ import { BulletinBoardPage } from './pages/community/BulletinBoardPage'
 import { BulletinPostPage } from './pages/community/BulletinPostPage'
 import { CreateBulletinPostPage } from './pages/community/CreateBulletinPostPage'
 import { NotificationsPage } from './pages/community/NotificationsPage'
+import { ModerationPage } from './pages/admin/ModerationPage'
 import './App.css'
 
 function App() {
@@ -52,6 +53,7 @@ function App() {
           <Route path="/community/new" element={<CreateBulletinPostPage />} />
           <Route path="/community/:postId" element={<BulletinPostPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/admin/moderation" element={<ModerationPage />} />
         </Route>
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />

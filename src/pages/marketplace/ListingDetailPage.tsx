@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { EmptyState } from '../../components/marketplace/EmptyState'
 import { ProductImage } from '../../components/marketplace/ProductImage'
+import { ReportDialog } from '../../components/trust/ReportDialog'
 import { useMarketplace } from '../../context/useMarketplace'
 import { listingService } from '../../lib/listings'
 import type { Listing } from '../../types/marketplace'
@@ -13,6 +14,7 @@ export function ListingDetailPage() {
   const { addToCart, cart } = useMarketplace()
   const [listing, setListing] = useState<Listing | null | undefined>(undefined)
   const [added, setAdded] = useState(false)
+  const [reporting, setReporting] = useState(false)
 
   useEffect(() => { listingService.findById(listingId).then(setListing) }, [listingId])
   const inCart = cart.some((line) => line.listingId === listingId)
@@ -41,12 +43,13 @@ export function ListingDetailPage() {
           <div><h2>{listing.seller.name}{listing.seller.verified && <BadgeCheck size={16} aria-label="Verified seller" />}</h2><p><Star size={14} fill="currentColor" />{listing.seller.rating} · {listing.seller.reviews} reviews</p></div>
           <Link to={`/sellers/${listing.seller.id}`}>View seller</Link>
         </section>
-        <button className="report-link" type="button"><Flag size={15} />Report this listing</button>
+        <button className="report-link" type="button" onClick={() => setReporting(true)}><Flag size={15} />Report this listing</button>
       </div>
       <div className="purchase-bar">
         <button className="button button--secondary" type="button" onClick={add} disabled={inCart}><ShoppingBag size={17} />{inCart ? 'In cart' : 'Add to cart'}</button>
         <Link className="button button--primary" to="/cart" onClick={add}>Buy now</Link>
       </div>
+      <ReportDialog open={reporting} onClose={() => setReporting(false)} targetType="listing" targetId={listing.id} targetLabel={listing.title} />
     </article>
   )
 }

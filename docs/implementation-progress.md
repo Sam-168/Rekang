@@ -65,10 +65,6 @@ Implemented on the `develop` branch:
 
 The Account navigation item currently opens order history. A fuller personal-account hub can be added after the required screens are complete.
 
-## Remaining batches
-
-1. Reporting and admin moderation, then Supabase migrations, storage/RLS policies and complete integration testing.
-
 Batch 3 verification covers seven desktop and mobile routes plus cart-to-checkout payment, confirmation-to-order navigation, buyer/seller history switching, seller tabs, and eligible review submission.
 
 ## Batch 4 — Community bulletin and notifications
@@ -83,3 +79,18 @@ Implemented on the `develop` branch:
 `src/lib/community.ts` is the temporary in-memory bulletin adapter. `CommunityProvider` owns local notification read state until Supabase Realtime and persisted notifications are connected.
 
 Batch 4 verification covers desktop and 390 × 844 rendering, category filters, feed-to-detail navigation, draft retention through preview, post publishing, unread notification state and horizontal overflow.
+
+## Batch 5 — Reporting, moderation and Supabase foundation
+
+Implemented on the `develop` branch:
+
+- Report dialog on listing and seller-profile screens with reason selection, optional detail, confirmation and duplicate-open-report protection
+- `/admin/moderation` — restricted-access state plus local admin preview, status filters, report inspection, internal notes and resolve/dismiss decisions
+- `supabase/migrations/202610040001_initial_schema.sql` — auth-linked profiles, listings/images, cart, orders/items, reviews, bulletin posts, notifications, reports, constraints, indexes, triggers, Realtime configuration and RLS policies
+- `supabase/migrations/202610040002_storage_policies.sql` — listing-image and avatar buckets with MIME, size and owner-folder policies
+- `src/lib/supabase.ts` — optional browser client that remains disabled until both public environment variables are configured
+- `docs/supabase-setup.md` — linking, migration, Auth, storage, security and local verification instructions
+
+Final verification covers all 24 application routes at 1280 × 900 and 390 × 844, report submission and duplicate prevention, non-admin route denial, moderation filters and decisions, TypeScript production compilation, ESLint and whitespace checks. No route errors or horizontal overflow were found.
+
+The Supabase migrations were statically audited but not executed because this machine has no Supabase CLI or configured project credentials. Run the documented `supabase db reset` and `supabase db lint` checks when the project is connected.
