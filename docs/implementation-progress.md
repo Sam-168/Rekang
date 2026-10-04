@@ -67,7 +67,19 @@ The Account navigation item currently opens order history. A fuller personal-acc
 
 ## Remaining batches
 
-1. Bulletin board feed/detail/create and notifications.
-2. Reporting and admin moderation, then Supabase migrations, storage/RLS policies and complete integration testing.
+1. Reporting and admin moderation, then Supabase migrations, storage/RLS policies and complete integration testing.
 
 Batch 3 verification covers seven desktop and mobile routes plus cart-to-checkout payment, confirmation-to-order navigation, buyer/seller history switching, seller tabs, and eligible review submission.
+
+## Batch 4 — Community bulletin and notifications
+
+Implemented on the `develop` branch:
+
+- `/community` — campus bulletin feed with Events, Announcements and Study groups filters
+- `/community/:postId` — bulletin details, event time/location and verified author details
+- `/community/new` — category-aware post form, preview/edit step and publishing flow
+- `/notifications` — order, review, community and account updates with unread state and mark-all action
+
+`src/lib/community.ts` is the temporary in-memory bulletin adapter. `CommunityProvider` owns local notification read state until Supabase Realtime and persisted notifications are connected.
+
+Batch 4 verification covers desktop and 390 × 844 rendering, category filters, feed-to-detail navigation, draft retention through preview, post publishing, unread notification state and horizontal overflow.

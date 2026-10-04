@@ -1,6 +1,7 @@
 import { Bell, Home, Megaphone, Plus, ShoppingBag, UserRound } from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useMarketplace } from '../../context/useMarketplace'
+import { useCommunity } from '../../context/useCommunity'
 
 const navItems = [
   { to: '/home', label: 'Market', icon: Home },
@@ -11,6 +12,7 @@ const navItems = [
 
 export function AppShell() {
   const { cartCount } = useMarketplace()
+  const { unreadCount } = useCommunity()
   const location = useLocation()
   const showBottomNav = ['/home', '/community', '/listings/new', '/orders'].includes(location.pathname)
 
@@ -19,7 +21,10 @@ export function AppShell() {
       <header className="app-header">
         <NavLink to="/home" className="brand" aria-label="Rekang marketplace">rekang.</NavLink>
         <div className="app-header__actions">
-          <button className="icon-button" type="button" aria-label="Notifications"><Bell size={20} /></button>
+          <NavLink className="icon-button" to="/notifications" aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}>
+            <Bell size={20} />
+            {unreadCount > 0 && <span className="cart-count notification-count">{unreadCount}</span>}
+          </NavLink>
           <NavLink className="icon-button cart-link" to="/cart" aria-label={`Cart with ${cartCount} items`}>
             <ShoppingBag size={20} />
             {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
