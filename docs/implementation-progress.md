@@ -49,3 +49,25 @@ Routes for checkout, community, account, and seller profiles currently show expl
 - Horizontal-overflow checks at desktop and mobile sizes
 
 Batch 2 additionally verifies desktop and 390 × 844 rendering for all six marketplace routes, search results, price filtering, detail-to-cart navigation, quantity totals, listing creation, and listing editing.
+
+## Batch 3 — Checkout, orders, seller profiles and reviews
+
+Implemented on the `develop` branch:
+
+- `/checkout` — collection details, PayFast/SnapScan test selection, sandbox warning, processing and failure feedback
+- `/orders/:orderId/confirmation` — successful test-payment confirmation and next actions
+- `/orders` — buyer and seller order-history views with status badges
+- `/orders/:orderId` — item, collection, payment and review-eligibility details
+- `/sellers/:sellerId` — verified seller profile, listings and reviews tabs
+- `/orders/:orderId/review` — rating, review validation, eligibility guard and submission confirmation
+
+`src/lib/orders.ts` is a temporary in-memory service for orders and reviews. Supabase will replace this service after the screens are complete. Payment actions are simulations and never contact PayFast or SnapScan.
+
+The Account navigation item currently opens order history. A fuller personal-account hub can be added after the required screens are complete.
+
+## Remaining batches
+
+1. Bulletin board feed/detail/create and notifications.
+2. Reporting and admin moderation, then Supabase migrations, storage/RLS policies and complete integration testing.
+
+Batch 3 verification covers seven desktop and mobile routes plus cart-to-checkout payment, confirmation-to-order navigation, buyer/seller history switching, seller tabs, and eligible review submission.

@@ -6,13 +6,13 @@ const navItems = [
   { to: '/home', label: 'Market', icon: Home },
   { to: '/community', label: 'Community', icon: Megaphone },
   { to: '/listings/new', label: 'Sell', icon: Plus },
-  { to: '/account', label: 'Account', icon: UserRound },
+  { to: '/orders', label: 'Account', icon: UserRound },
 ]
 
 export function AppShell() {
   const { cartCount } = useMarketplace()
   const location = useLocation()
-  const showBottomNav = ['/home', '/community', '/listings/new', '/account'].includes(location.pathname)
+  const showBottomNav = ['/home', '/community', '/listings/new', '/orders'].includes(location.pathname)
 
   return (
     <div className="app-shell">

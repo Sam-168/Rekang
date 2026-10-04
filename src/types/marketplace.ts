@@ -34,3 +34,28 @@ export type CartLine = {
   listingId: string
   quantity: number
 }
+
+export type PaymentGateway = 'payfast' | 'snapscan'
+export type OrderStatus = 'paid' | 'ready_for_collection' | 'completed' | 'cancelled'
+
+export type Order = {
+  id: string
+  listingId: string
+  quantity: number
+  buyerId: string
+  sellerId: string
+  status: OrderStatus
+  total: number
+  gateway: PaymentGateway
+  createdAt: string
+}
+
+export type Review = {
+  id: string
+  orderId: string
+  sellerId: string
+  reviewerName: string
+  rating: number
+  comment: string
+  createdAt: string
+}

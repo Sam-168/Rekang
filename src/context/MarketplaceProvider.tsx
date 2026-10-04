@@ -23,6 +23,9 @@ export function MarketplaceProvider({ children }: { children: ReactNode }) {
         ? { ...line, quantity: Math.max(1, Math.min(quantity, 5)) }
         : line))
     },
+    clearCart() {
+      setCart([])
+    },
     cartCount: cart.reduce((total, line) => total + line.quantity, 0),
   }), [cart, filters])
 

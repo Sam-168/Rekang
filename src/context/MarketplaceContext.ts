@@ -8,6 +8,7 @@ export type MarketplaceState = {
   addToCart: (listingId: string) => void
   removeFromCart: (listingId: string) => void
   setQuantity: (listingId: string, quantity: number) => void
+  clearCart: () => void
   cartCount: number
 }
 

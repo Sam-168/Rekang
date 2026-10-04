@@ -13,6 +13,12 @@ import { FiltersPage } from './pages/marketplace/FiltersPage'
 import { ListingDetailPage } from './pages/marketplace/ListingDetailPage'
 import { ListingEditorPage } from './pages/marketplace/ListingEditorPage'
 import { MarketplacePage } from './pages/marketplace/MarketplacePage'
+import { CheckoutPage } from './pages/orders/CheckoutPage'
+import { OrderConfirmationPage } from './pages/orders/OrderConfirmationPage'
+import { OrderDetailPage } from './pages/orders/OrderDetailPage'
+import { OrderHistoryPage } from './pages/orders/OrderHistoryPage'
+import { ReviewPage } from './pages/orders/ReviewPage'
+import { SellerProfilePage } from './pages/profile/SellerProfilePage'
 import './App.css'
 
 function App() {
@@ -33,12 +39,15 @@ function App() {
           <Route path="/listings/new" element={<ListingEditorPage />} />
           <Route path="/listings/:listingId" element={<ListingDetailPage />} />
           <Route path="/listings/:listingId/edit" element={<ListingEditorPage />} />
-          <Route path="/sellers/:sellerId" element={<ComingSoon section="Seller profiles and reviews" />} />
+          <Route path="/sellers/:sellerId" element={<SellerProfilePage />} />
+          <Route path="/orders" element={<OrderHistoryPage />} />
+          <Route path="/orders/:orderId" element={<OrderDetailPage />} />
           <Route path="/community" element={<ComingSoon section="Community board" />} />
-          <Route path="/account" element={<ComingSoon section="Account and reviews" />} />
         </Route>
         <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<ComingSoon section="Checkout" />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/orders/:orderId/confirmation" element={<OrderConfirmationPage />} />
+        <Route path="/orders/:orderId/review" element={<ReviewPage />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
