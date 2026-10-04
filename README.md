@@ -59,6 +59,10 @@ npm run dev
 
 The app will be available at `http://localhost:5173` by default.
 
+## Current implementation
+
+The Controlled account flow is implemented on the `develop` branch. It includes login, sign up, role selection, password recovery/reset, and email/vendor verification screens. Authentication uses a temporary local adapter until Supabase is configured. See [`docs/implementation-progress.md`](docs/implementation-progress.md) for routes, test scenarios, and the current handoff point.
+
 ## Project Structure
 
 ```
