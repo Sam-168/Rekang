@@ -59,6 +59,12 @@ npm run dev
 
 The app will be available at `http://localhost:5173` by default.
 
+## Current implementation
+
+The complete Controlled MVP screen set is implemented on the `develop` branch: authentication, marketplace/listings, cart/checkout, orders, seller profiles/reviews, community bulletins, notifications, reporting, and admin moderation. Local adapters keep every flow reviewable before credentials are available.
+
+The Supabase schema, migrations, storage buckets, Realtime tables, database constraints, and RLS policies are ready to apply. See [`docs/supabase-setup.md`](docs/supabase-setup.md) for the setup and security model, and [`docs/implementation-progress.md`](docs/implementation-progress.md) for route and verification coverage.
+
 ## Project Structure
 
 ```
@@ -71,6 +77,7 @@ rekang/
 │   ├── App.tsx
 │   └── main.tsx
 ├── public/
+├── supabase/            # CLI config and versioned database/storage migrations
 ├── .env.example
 ├── .gitignore
 ├── tsconfig.json
