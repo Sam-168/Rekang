@@ -88,9 +88,9 @@ Implemented on the `develop` branch:
 - `/admin/moderation` — restricted-access state plus local admin preview, status filters, report inspection, internal notes and resolve/dismiss decisions
 - `supabase/migrations/202610040001_initial_schema.sql` — auth-linked profiles, listings/images, cart, orders/items, reviews, bulletin posts, notifications, reports, constraints, indexes, triggers, Realtime configuration and RLS policies
 - `supabase/migrations/202610040002_storage_policies.sql` — listing-image and avatar buckets with MIME, size and owner-folder policies
-- `src/lib/supabase.ts` — optional browser client that remains disabled until both public environment variables are configured
+- `src/lib/supabase.ts` — browser client enabled locally by the ignored `.env` project URL and public publishable key
 - `docs/supabase-setup.md` — linking, migration, Auth, storage, security and local verification instructions
 
 Final verification covers all 24 application routes at 1280 × 900 and 390 × 844, report submission and duplicate prevention, non-admin route denial, moderation filters and decisions, TypeScript production compilation, ESLint and whitespace checks. No route errors or horizontal overflow were found.
 
-The Supabase migrations were statically audited but not executed because this machine has no Supabase CLI or configured project credentials. Run the documented `supabase db reset` and `supabase db lint` checks when the project is connected.
+The hosted Supabase project is configured and both checked-in migrations are applied. Remote verification found 10 application tables with RLS, 27 public-table policies, 4 storage policies, 2 storage buckets and 2 Realtime tables. Email/password sign-in, email confirmation, and local Vite redirect URLs are configured; the ignored local `.env` contains the project URL and public browser key. The Controlled screens still use their local adapters until the next integration pass replaces those boundaries with Supabase Auth, database, Storage and Realtime calls.

@@ -1,14 +1,31 @@
 # Supabase setup and security model
 
-The project can run without Supabase while the Controlled screens use local adapters. When the shared Supabase project is ready, apply the checked-in migrations rather than creating tables manually in the dashboard.
+The project can run without Supabase while the Controlled screens use local adapters. The hosted `Rekang` project is now provisioned and the checked-in migrations have been applied. Keep using migrations for every schema change so local and hosted environments stay reproducible.
+
+## Current hosted project
+
+- Project reference: `tqiyqcihmgfbemzuabro`
+- Project URL: `https://tqiyqcihmgfbemzuabro.supabase.co`
+- Region: Central EU (Frankfurt)
+- Applied on: 2026-10-04
+- Verified state: 10 application tables with RLS, 27 public-table policies, 4 storage policies, 2 storage buckets, and 2 Realtime tables
+
+The two initial migrations were applied through the dashboard SQL editor because the Supabase CLI could not persist its local runtime files on this machine. Before the first future `supabase db push`, link the project and mark both existing migrations as applied:
+
+```bash
+supabase link --project-ref tqiyqcihmgfbemzuabro
+supabase migration repair --status applied 202610040001
+supabase migration repair --status applied 202610040002
+```
 
 ## Connect the project
 
 1. Install or run the Supabase CLI and sign in.
-2. From the repository root, run `supabase link --project-ref <project-ref>`.
-3. Review the target project, then run `supabase db push`.
-4. Copy `.env.example` to `.env` and add the project URL and public anon key.
-5. Generate TypeScript types after each schema change:
+2. From the repository root, link project `tqiyqcihmgfbemzuabro`.
+3. Repair the migration history once using the commands above.
+4. Review future migrations, then run `supabase db push`.
+5. Copy `.env.example` to `.env` and add the project URL and public publishable key.
+6. Generate TypeScript types after each schema change:
 
    ```bash
    supabase gen types typescript --linked > src/types/database.generated.ts
@@ -18,8 +35,9 @@ Never add the service-role key to a Vite environment variable. Vite exposes `VIT
 
 ## Authentication configuration
 
-- Enable email/password authentication and email confirmation.
-- Add the deployed site URL and local development redirect URL to Auth URL Configuration.
+- Email/password authentication and email confirmation are enabled.
+- The current Site URL is `http://localhost:5173`; redirects allow `http://localhost:5173/**` and `http://127.0.0.1:5173/**`.
+- Replace the Site URL and add the production redirect URL before deployment.
 - Pass `full_name`, `role`, and `campus` as sign-up metadata. The database trigger creates the matching profile and refuses `admin` as a self-selected role.
 - Set `verified`, `verification_status`, and admin roles through a trusted admin workflow or SQL run by the service role. Profile updates from the browser cannot change these protected fields.
 - Keep vendor verification pending until a moderator approves it. University-domain verification should be performed by trusted server-side logic before setting `verified`.
@@ -49,4 +67,4 @@ supabase db reset
 supabase db lint
 ```
 
-The migrations have not been applied to a remote project because no Supabase project credentials are configured in this repository.
+The hosted migrations were verified in the dashboard. Local Docker verification remains useful before future schema changes are pushed.
