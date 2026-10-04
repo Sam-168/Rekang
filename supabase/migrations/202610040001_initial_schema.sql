@@ -396,6 +396,18 @@ create policy reports_read_admin_only on public.reports for select to authentica
 create policy reports_update_admin_only on public.reports for update to authenticated
   using (public.current_user_is_admin()) with check (public.current_user_is_admin());
 
+grant usage on schema public to authenticated;
+grant select, update on public.profiles to authenticated;
+grant select, insert, update, delete on public.listings to authenticated;
+grant select, insert, update, delete on public.listing_images to authenticated;
+grant select, insert, update, delete on public.cart_items to authenticated;
+grant select, insert, update on public.orders to authenticated;
+grant select, insert on public.order_items to authenticated;
+grant select, insert, update, delete on public.reviews to authenticated;
+grant select, insert, update, delete on public.bulletin_posts to authenticated;
+grant select, insert, update on public.reports to authenticated;
+grant select on public.notifications to authenticated;
+
 revoke all on function public.current_user_is_admin() from public;
 revoke all on function public.current_user_is_verified() from public;
 revoke all on function public.current_user_participates_in_order(uuid) from public;
