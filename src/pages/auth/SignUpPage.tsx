@@ -3,10 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { AuthPage, SignUpProgress } from '../../components/auth/AuthPage'
 import { FormField } from '../../components/auth/FormField'
 import { Notice } from '../../components/auth/Notice'
-import { authService } from '../../lib/auth'
+import { useAuth } from '../../context/useAuth'
 
 export function SignUpPage() {
   const navigate = useNavigate()
+  const { stageSignup } = useAuth()
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -16,12 +17,10 @@ export function SignUpPage() {
     const data = new FormData(event.currentTarget)
     const password = String(data.get('password'))
     if (password.length < 8) return setError('Use at least 8 characters for your password.')
-    setSubmitting(true)
     const email = String(data.get('email'))
-    const result = await authService.createAccount(email)
+    setSubmitting(true)
+    stageSignup({ fullName: String(data.get('name')), email, password })
     setSubmitting(false)
-    if (!result.ok) return setError(result.message)
-    sessionStorage.setItem('rekang-signup', JSON.stringify({ name: data.get('name'), email }))
     navigate('/signup/role')
   }
 

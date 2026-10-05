@@ -11,7 +11,7 @@ Implemented on the `develop` branch:
 - `/reset-password` — new password, mismatch validation and success state
 - `/verify` — email verification, resend feedback, verified state and vendor-review variant
 
-The pages use shared auth layout, field, notice and progress components. `src/lib/auth.ts` is a temporary asynchronous adapter for local UI development. Replace its methods with Supabase Auth calls when the Supabase project is configured; page components should not need to change.
+The pages use shared auth layout, field, notice and progress components. The original local authentication adapter was replaced by Supabase Auth in Batch 6.
 
 Successful authentication now hands off to the implemented `/home` marketplace route.
 
@@ -37,7 +37,7 @@ Routes for checkout, community, account, and seller profiles currently show expl
 - Use an email containing `invalid` or password `wrongpass` to see the login error.
 - Use an email containing `existing` to see the duplicate-account error.
 - Choose Local vendor to see manual-review verification.
-- The verification screen includes a temporary “Preview verified state” control for UI review. Remove or replace it when live verification is connected.
+- Account verification now follows Supabase confirmation links and the database-backed profile status.
 
 ## Verification completed
 
@@ -85,7 +85,7 @@ Batch 4 verification covers desktop and 390 × 844 rendering, category filters, 
 Implemented on the `develop` branch:
 
 - Report dialog on listing and seller-profile screens with reason selection, optional detail, confirmation and duplicate-open-report protection
-- `/admin/moderation` — restricted-access state plus local admin preview, status filters, report inspection, internal notes and resolve/dismiss decisions
+- `/admin/moderation` — restricted-access state, status filters, report inspection, internal notes and resolve/dismiss decisions
 - `supabase/migrations/202610040001_initial_schema.sql` — auth-linked profiles, listings/images, cart, orders/items, reviews, bulletin posts, notifications, reports, constraints, indexes, triggers, Realtime configuration and RLS policies
 - `supabase/migrations/202610040002_storage_policies.sql` — listing-image and avatar buckets with MIME, size and owner-folder policies
 - `src/lib/supabase.ts` — browser client enabled locally by the ignored `.env` project URL and public publishable key
@@ -93,4 +93,18 @@ Implemented on the `develop` branch:
 
 Final verification covers all 24 application routes at 1280 × 900 and 390 × 844, report submission and duplicate prevention, non-admin route denial, moderation filters and decisions, TypeScript production compilation, ESLint and whitespace checks. No route errors or horizontal overflow were found.
 
-The hosted Supabase project is configured and both checked-in migrations are applied. Remote verification found 10 application tables with RLS, 27 public-table policies, 4 storage policies, 2 storage buckets and 2 Realtime tables. Email/password sign-in, email confirmation, and local Vite redirect URLs are configured; the ignored local `.env` contains the project URL and public browser key. The Controlled screens still use their local adapters until the next integration pass replaces those boundaries with Supabase Auth, database, Storage and Realtime calls.
+The hosted Supabase project is configured and the schema and storage migrations are applied. Remote verification found 10 application tables with RLS, 27 public-table policies, 4 storage policies, 2 storage buckets and 2 Realtime tables. Email/password sign-in, email confirmation, and local Vite redirect URLs are configured; the ignored local `.env` contains the project URL and public browser key.
+
+## Batch 6 — Supabase authentication integration
+
+Implemented on the `develop` branch:
+
+- Real Supabase email/password sign-up, sign-in, sign-out, confirmation resend, password-reset request and password update
+- In-memory sign-up handoff so passwords are never written to browser storage while the user chooses a role
+- Persistent session provider, authenticated route guards, return-to-requested-page behavior and live profile loading
+- Verified-profile and admin-role checks backed by the Supabase `profiles` table
+- Database-enforced `.ac.za` addresses for student/faculty roles and automatic non-vendor verification after email confirmation
+- Vendor accounts remain pending for manual review after their email is confirmed
+- Removed the local verification and administrator preview shortcuts
+
+`supabase/migrations/202610050001_auth_profile_verification.sql` is applied to the hosted project. Remote verification confirmed both authentication functions and both `auth.users` triggers. Marketplace, orders, community, notifications and reporting still use their local adapters and are the remaining Supabase integration work.

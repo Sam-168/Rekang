@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { AuthPage, SignUpProgress } from '../../components/auth/AuthPage'
 import type { UserRole } from '../../lib/auth'
+import { Notice } from '../../components/auth/Notice'
+import { useAuth } from '../../context/useAuth'
 
 const roles: Array<{ value: UserRole; label: string; description: string }> = [
   { value: 'student', label: 'Student', description: 'Buy, sell and join campus activities. University email verification required.' },
@@ -12,17 +14,27 @@ const roles: Array<{ value: UserRole; label: string; description: string }> = [
 
 export function RoleSelectionPage() {
   const navigate = useNavigate()
+  const { pendingSignup, completeSignup } = useAuth()
   const [role, setRole] = useState<UserRole>('student')
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
-  function handleSubmit(event: FormEvent) {
+  if (!pendingSignup) return <Navigate to="/signup" replace />
+
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    sessionStorage.setItem('rekang-role', role)
+    setError('')
+    setSubmitting(true)
+    const result = await completeSignup(role)
+    setSubmitting(false)
+    if (!result.ok) return setError(result.message)
     navigate(`/verify?type=${role === 'vendor' ? 'vendor' : 'email'}`)
   }
 
   return (
     <AuthPage eyebrow="Step 2 of 3" title="How will you use Rekang?" intro="Choose the role that best fits you. You can ask support to update it later." wide>
       <SignUpProgress step={2} />
+      {error && <Notice error>{error}</Notice>}
       <form onSubmit={handleSubmit}>
         <fieldset className="role-list">
           <legend className="sr-only">Choose your account role</legend>
@@ -33,7 +45,7 @@ export function RoleSelectionPage() {
             </label>
           ))}
         </fieldset>
-        <button className="button button--primary button--block" type="submit">Continue</button>
+        <button className="button button--primary button--block" type="submit" disabled={submitting}>{submitting ? 'Creating account…' : 'Create account'}</button>
       </form>
       <div className="form-footer"><span>Need to change your details?</span><button className="text-link text-link--button" type="button" onClick={() => navigate('/signup')}>Back to account</button></div>
     </AuthPage>

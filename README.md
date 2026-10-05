@@ -49,7 +49,7 @@ VITE_SUPABASE_URL=your-supabase-project-url
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-Ask the Supabase/Database team member for these values once you've been invited to the shared Supabase project.
+Use the hosted Rekang project values from the Supabase Connect panel. The publishable browser key is safe to use in Vite; never put the service-role key in a frontend environment variable.
 
 ### Running Locally
 
@@ -61,9 +61,9 @@ The app will be available at `http://localhost:5173` by default.
 
 ## Current implementation
 
-The complete Controlled MVP screen set is implemented on the `develop` branch: authentication, marketplace/listings, cart/checkout, orders, seller profiles/reviews, community bulletins, notifications, reporting, and admin moderation. Local adapters keep every flow reviewable before credentials are available.
+The complete Controlled MVP screen set is implemented on the `develop` branch: authentication, marketplace/listings, cart/checkout, orders, seller profiles/reviews, community bulletins, notifications, reporting, and admin moderation. Authentication is connected to the hosted Supabase project; the remaining product areas still use reviewable local adapters while their database integration is completed.
 
-The Supabase schema, migrations, storage buckets, Realtime tables, database constraints, and RLS policies are ready to apply. See [`docs/supabase-setup.md`](docs/supabase-setup.md) for the setup and security model, and [`docs/implementation-progress.md`](docs/implementation-progress.md) for route and verification coverage.
+The Supabase schema, migrations, storage buckets, Realtime tables, database constraints, RLS policies, and authentication triggers are applied to the hosted project. See [`docs/supabase-setup.md`](docs/supabase-setup.md) for the setup and security model, and [`docs/implementation-progress.md`](docs/implementation-progress.md) for route and verification coverage.
 
 ## Project Structure
 
