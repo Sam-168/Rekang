@@ -5,8 +5,10 @@ import { AuthPage } from '../../components/auth/AuthPage'
 import { FormField } from '../../components/auth/FormField'
 import { Notice } from '../../components/auth/Notice'
 import { authService } from '../../lib/auth'
+import { useAuth } from '../../context/useAuth'
 
 export function ResetPasswordPage() {
+  const { session, loading } = useAuth()
   const [error, setError] = useState('')
   const [updated, setUpdated] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -20,10 +22,14 @@ export function ResetPasswordPage() {
     if (password !== confirmation) return setError('The passwords don’t match. Check both fields.')
     setError('')
     setSubmitting(true)
-    await authService.updatePassword()
+    const result = await authService.updatePassword(password)
     setSubmitting(false)
+    if (!result.ok) return setError(result.message)
     setUpdated(true)
   }
+
+  if (loading) return <AuthPage eyebrow="Password reset" title="Checking your reset link." intro="This will only take a moment." />
+  if (!session) return <AuthPage eyebrow="Password reset" title="Open a valid reset link." intro="Request a new password-reset email, then open the link from that message."><Notice error>This reset link is missing, invalid or expired.</Notice><Link className="button button--primary button--block" to="/forgot-password">Request a new link</Link></AuthPage>
 
   if (updated) {
     return (

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AuthPage } from '../../components/auth/AuthPage'
 import { FormField } from '../../components/auth/FormField'
 import { Notice } from '../../components/auth/Notice'
@@ -7,6 +7,7 @@ import { authService } from '../../lib/auth'
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -18,7 +19,8 @@ export function LoginPage() {
     const result = await authService.signIn(String(data.get('email')), String(data.get('password')))
     setSubmitting(false)
     if (!result.ok) return setError(result.message)
-    navigate('/home')
+    const destination = (location.state as { from?: string } | null)?.from
+    navigate(destination?.startsWith('/') ? destination : '/home', { replace: true })
   }
 
   return (

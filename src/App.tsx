@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AuthLayout } from './components/auth/AuthLayout'
+import { GuestOnly, RequireAuth } from './components/auth/AuthGuards'
 import { AppShell } from './components/app/AppShell'
 import { MarketplaceProvider } from './context/MarketplaceProvider'
 import { CommunityProvider } from './context/CommunityProvider'
@@ -32,33 +33,39 @@ function App() {
     <MarketplaceProvider>
       <CommunityProvider>
       <Routes>
+        <Route element={<GuestOnly />}>
+          <Route element={<AuthLayout />}>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/signup/role" element={<RoleSelectionPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          </Route>
+        </Route>
         <Route element={<AuthLayout />}>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/signup/role" element={<RoleSelectionPage />} />
           <Route path="/verify" element={<VerificationPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
         </Route>
-        <Route element={<AppShell />}>
-          <Route path="/home" element={<MarketplacePage />} />
-          <Route path="/filters" element={<FiltersPage />} />
-          <Route path="/listings/new" element={<ListingEditorPage />} />
-          <Route path="/listings/:listingId" element={<ListingDetailPage />} />
-          <Route path="/listings/:listingId/edit" element={<ListingEditorPage />} />
-          <Route path="/sellers/:sellerId" element={<SellerProfilePage />} />
-          <Route path="/orders" element={<OrderHistoryPage />} />
-          <Route path="/orders/:orderId" element={<OrderDetailPage />} />
-          <Route path="/community" element={<BulletinBoardPage />} />
-          <Route path="/community/new" element={<CreateBulletinPostPage />} />
-          <Route path="/community/:postId" element={<BulletinPostPage />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/admin/moderation" element={<ModerationPage />} />
+        <Route element={<RequireAuth />}>
+          <Route element={<AppShell />}>
+            <Route path="/home" element={<MarketplacePage />} />
+            <Route path="/filters" element={<FiltersPage />} />
+            <Route path="/listings/new" element={<ListingEditorPage />} />
+            <Route path="/listings/:listingId" element={<ListingDetailPage />} />
+            <Route path="/listings/:listingId/edit" element={<ListingEditorPage />} />
+            <Route path="/sellers/:sellerId" element={<SellerProfilePage />} />
+            <Route path="/orders" element={<OrderHistoryPage />} />
+            <Route path="/orders/:orderId" element={<OrderDetailPage />} />
+            <Route path="/community" element={<BulletinBoardPage />} />
+            <Route path="/community/new" element={<CreateBulletinPostPage />} />
+            <Route path="/community/:postId" element={<BulletinPostPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/admin/moderation" element={<ModerationPage />} />
+          </Route>
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/orders/:orderId/confirmation" element={<OrderConfirmationPage />} />
+          <Route path="/orders/:orderId/review" element={<ReviewPage />} />
         </Route>
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/orders/:orderId/confirmation" element={<OrderConfirmationPage />} />
-        <Route path="/orders/:orderId/review" element={<ReviewPage />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

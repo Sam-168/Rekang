@@ -5,7 +5,7 @@ type AuthPageProps = {
   title: string
   intro?: string
   wide?: boolean
-  children: ReactNode
+  children?: ReactNode
 }
 
 export function AuthPage({ eyebrow, title, intro, wide, children }: AuthPageProps) {

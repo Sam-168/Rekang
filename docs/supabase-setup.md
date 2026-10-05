@@ -7,15 +7,17 @@ The project can run without Supabase while the Controlled screens use local adap
 - Project reference: `tqiyqcihmgfbemzuabro`
 - Project URL: `https://tqiyqcihmgfbemzuabro.supabase.co`
 - Region: Central EU (Frankfurt)
-- Applied on: 2026-10-04
-- Verified state: 10 application tables with RLS, 27 public-table policies, 4 storage policies, 2 storage buckets, and 2 Realtime tables
+- Initial schema applied on: 2026-10-04
+- Authentication migration applied on: 2026-10-05
+- Verified state: 10 application tables with RLS, 27 public-table policies, 4 storage policies, 2 storage buckets, 2 Realtime tables, 2 authentication functions, and 2 authentication triggers
 
-The two initial migrations were applied through the dashboard SQL editor because the Supabase CLI could not persist its local runtime files on this machine. Before the first future `supabase db push`, link the project and mark both existing migrations as applied:
+The migrations were applied through the dashboard SQL editor because the Supabase CLI could not persist its local runtime files on this machine. Before the first future `supabase db push`, link the project and mark the existing migrations as applied:
 
 ```bash
 supabase link --project-ref tqiyqcihmgfbemzuabro
 supabase migration repair --status applied 202610040001
 supabase migration repair --status applied 202610040002
+supabase migration repair --status applied 202610050001
 ```
 
 ## Connect the project
@@ -38,9 +40,10 @@ Never add the service-role key to a Vite environment variable. Vite exposes `VIT
 - Email/password authentication and email confirmation are enabled.
 - The current Site URL is `http://localhost:5173`; redirects allow `http://localhost:5173/**` and `http://127.0.0.1:5173/**`.
 - Replace the Site URL and add the production redirect URL before deployment.
-- Pass `full_name`, `role`, and `campus` as sign-up metadata. The database trigger creates the matching profile and refuses `admin` as a self-selected role.
+- The React client sends `full_name`, `role`, and `campus` as sign-up metadata. The database trigger creates the matching profile and refuses `admin` as a self-selected role.
+- Student and faculty accounts must use a `.ac.za` address. After Supabase confirms the email, a database trigger verifies non-vendor profiles automatically.
 - Set `verified`, `verification_status`, and admin roles through a trusted admin workflow or SQL run by the service role. Profile updates from the browser cannot change these protected fields.
-- Keep vendor verification pending until a moderator approves it. University-domain verification should be performed by trusted server-side logic before setting `verified`.
+- Vendor verification remains pending after email confirmation until a moderator approves it.
 
 ## Storage paths
 

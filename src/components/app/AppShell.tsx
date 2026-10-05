@@ -1,7 +1,8 @@
-import { Bell, Home, Megaphone, Plus, ShoppingBag, UserRound } from 'lucide-react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Bell, Home, LogOut, Megaphone, Plus, ShoppingBag, UserRound } from 'lucide-react'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useMarketplace } from '../../context/useMarketplace'
 import { useCommunity } from '../../context/useCommunity'
+import { useAuth } from '../../context/useAuth'
 
 const navItems = [
   { to: '/home', label: 'Market', icon: Home },
@@ -14,6 +15,8 @@ export function AppShell() {
   const { cartCount } = useMarketplace()
   const { unreadCount } = useCommunity()
   const location = useLocation()
+  const navigate = useNavigate()
+  const { profile, signOut } = useAuth()
   const showBottomNav = ['/home', '/community', '/listings/new', '/orders'].includes(location.pathname)
 
   return (
@@ -29,6 +32,7 @@ export function AppShell() {
             <ShoppingBag size={20} />
             {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
           </NavLink>
+          <button className="icon-button" type="button" aria-label={`Sign out${profile?.fullName ? ` ${profile.fullName}` : ''}`} onClick={async () => { const result = await signOut(); if (result.ok) navigate('/login', { replace: true }) }}><LogOut size={19} /></button>
         </div>
       </header>
       <main className="app-main"><Outlet /></main>
