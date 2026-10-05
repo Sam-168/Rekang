@@ -61,7 +61,7 @@ Implemented on the `develop` branch:
 - `/sellers/:sellerId` — verified seller profile, listings and reviews tabs
 - `/orders/:orderId/review` — rating, review validation, eligibility guard and submission confirmation
 
-`src/lib/orders.ts` is a temporary in-memory service for orders and reviews. Supabase will replace this service after the screens are complete. Payment actions are simulations and never contact PayFast or SnapScan.
+`src/lib/orders.ts` was connected to Supabase in Batch 8. Payment actions remain clearly labelled sandbox transactions and never contact PayFast or SnapScan.
 
 The Account navigation item currently opens order history. A fuller personal-account hub can be added after the required screens are complete.
 
@@ -122,4 +122,18 @@ Implemented on the `develop` branch:
 - Unverified profiles receive a verification-required state before the listing editor
 - Seller ratings, review counts and active-listing totals are loaded from database records
 
-End-to-end hosted verification used a disposable confirmed account to create a listing, upload an image, query the feed, persist and update a cart row, and then remove the listing, object and account. Production compilation, ESLint and whitespace checks also pass. Orders/payments, community/notifications and report moderation remain on local adapters.
+End-to-end hosted verification used a disposable confirmed account to create a listing, upload an image, query the feed, persist and update a cart row, and then remove the listing, object and account. Production compilation, ESLint and whitespace checks also pass. Community/notifications and report moderation remain on local adapters.
+
+## Batch 8 — Supabase orders and sandbox payments
+
+Implemented on the `develop` branch:
+
+- Atomic server-priced checkout from the authenticated cart, with listing row locks and one-seller orders
+- Buyer collection details, order confirmation, purchase history and live order details
+- Seller sales history and seller-only “ready for collection” transition
+- Buyer-only collection confirmation, cancellation of pending orders and verified-purchase reviews
+- Listing lifecycle updates from available to reserved to sold, with cancellation releasing inventory
+- Private `payments_mode` setting and a sandbox payment function that cannot run after production mode is enabled
+- Removed direct browser inserts and updates for orders and order items; clients use audited database functions
+
+`supabase/migrations/202610050002_orders_payments.sql` is applied to the hosted project. A rollback-only hosted test passed checkout total calculation, cart clearing, inventory reservation, sandbox payment, seller and buyer transitions, final sold state, and review creation without retaining test data. Production compilation, ESLint and whitespace checks pass.
