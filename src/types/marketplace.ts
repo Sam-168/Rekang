@@ -43,18 +43,34 @@ export type CartLine = {
 }
 
 export type PaymentGateway = 'payfast' | 'snapscan'
-export type OrderStatus = 'paid' | 'ready_for_collection' | 'completed' | 'cancelled'
+export type OrderStatus = 'pending_payment' | 'paid' | 'ready_for_collection' | 'completed' | 'cancelled' | 'refunded'
+
+export type OrderItem = {
+  id: string
+  listingId: string
+  sellerId: string
+  title: string
+  unitPrice: number
+  quantity: number
+  listing: Listing
+}
 
 export type Order = {
   id: string
-  listingId: string
-  quantity: number
+  reference: string
   buyerId: string
-  sellerId: string
+  buyerName: string
   status: OrderStatus
   total: number
   gateway: PaymentGateway
+  paymentReference: string | null
+  collectionName: string
+  collectionPhone: string
+  collectionNote: string
+  items: OrderItem[]
+  reviewed: boolean
   createdAt: string
+  updatedAt: string
 }
 
 export type Review = {

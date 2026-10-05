@@ -287,6 +287,8 @@
 .collection-option div { display: grid; gap: 5px; }
 .collection-option strong { font-size: 13px; }
 .collection-option span { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.checkout-collection-fields { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.checkout-collection-fields label:last-child { grid-column: 1 / -1; }
 .payment-options { display: grid; border: 1px solid var(--line); background: #fff; }
 .payment-options label { min-height: 68px; padding: 13px 15px; display: grid; grid-template-columns: 20px 22px 1fr; align-items: center; gap: 12px; cursor: pointer; }
 .payment-options label + label { border-top: 1px solid var(--line); }
@@ -331,12 +333,17 @@
 .order-row aside { min-width: 150px; display: grid; justify-items: end; gap: 9px; }
 .order-row aside > strong { font-size: 15px; }
 .order-status { display: inline-flex; padding: 5px 8px; background: var(--accent-soft); color: var(--accent); font-size: 10px; font-weight: 600; white-space: nowrap; }
+.order-status--pending_payment { background: #f1eee8; color: #6e5b3c; }
 .order-status--cancelled { background: var(--error-soft); color: var(--error); }
+.order-status--refunded { background: #edf0f4; color: #4d5969; }
 .order-list-loading { display: grid; gap: 14px; }
 .order-list-loading span { height: 92px; background: #e6e9e5; animation: pulse 1.4s infinite; }
 
 .order-detail-page { width: min(100% - 40px, 780px); margin: 0 auto; padding: 44px 0 96px; }
 .order-detail-heading { margin-bottom: 28px; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
+.order-detail-lines { display: grid; gap: 1px; border-block: 1px solid var(--line); }
+.order-detail-lines .order-line { border-bottom: 1px solid var(--line); }
+.order-detail-lines .order-line:last-child { border-bottom: 0; }
 .order-detail-grid { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
 .order-detail-grid section { padding: 24px 0; }
 .order-detail-grid section + section { padding-left: 25px; border-left: 1px solid var(--line); }
@@ -346,6 +353,8 @@
 .order-total { margin: 0 0 24px; padding: 22px 0; display: flex; align-items: center; justify-content: space-between; }
 .order-total strong { font-size: 24px; }
 .review-note { margin: 0; padding: 13px; border-left: 3px solid var(--accent); background: var(--accent-soft); color: var(--muted); font-size: 13px; }
+.order-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.order-actions .review-note { flex: 1 1 100%; }
 
 .seller-profile-head { display: grid; grid-template-columns: 82px 1fr auto; gap: 20px; align-items: center; }
 .seller-profile-avatar { width: 82px; height: 82px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: var(--wash); color: var(--accent); font-size: 23px; font-weight: 600; }
@@ -567,6 +576,8 @@
 
 @media (max-width: 640px) {
   .checkout-layout { padding-top: 34px; }
+  .checkout-collection-fields { grid-template-columns: 1fr; }
+  .checkout-collection-fields label:last-child { grid-column: auto; }
   .task-header { padding-inline: 20px; }
   .task-header > span { display: none; }
   .checkout-layout h1, .orders-page h1, .order-detail-page h1, .seller-page h1, .review-page h1, .confirmation-page h1 { font-size: 36px; letter-spacing: -1.8px; }

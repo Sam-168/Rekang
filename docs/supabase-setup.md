@@ -9,7 +9,8 @@ The project can run without Supabase while the Controlled screens use local adap
 - Region: Central EU (Frankfurt)
 - Initial schema applied on: 2026-10-04
 - Authentication migration applied on: 2026-10-05
-- Verified state: 10 application tables with RLS, 27 public-table policies, 4 storage policies, 2 storage buckets, 2 Realtime tables, 2 authentication functions, and 2 authentication triggers
+- Orders and payments migration applied on: 2026-10-05
+- Verified state: 10 application tables with RLS, browser writes protected by RLS and database functions, 4 storage policies, 2 storage buckets, 2 Realtime tables, and authentication/profile triggers
 
 The migrations were applied through the dashboard SQL editor because the Supabase CLI could not persist its local runtime files on this machine. Before the first future `supabase db push`, link the project and mark the existing migrations as applied:
 
@@ -18,6 +19,7 @@ supabase link --project-ref tqiyqcihmgfbemzuabro
 supabase migration repair --status applied 202610040001
 supabase migration repair --status applied 202610040002
 supabase migration repair --status applied 202610050001
+supabase migration repair --status applied 202610050002
 ```
 
 ## Connect the project
@@ -53,12 +55,12 @@ Upload listing images as `<user-id>/<listing-id>/<random-file-name>.<ext>` and a
 
 - Only verified accounts can create listings, bulletin posts, reports, or upload images.
 - Users manage their own profile, listings, cart, bulletin posts, and storage objects. Protected profile fields cannot be self-promoted.
-- Buyers and the relevant sellers can read orders. Only completed-order buyers can submit one review per order.
+- Buyers and the relevant sellers can read orders and their reserved/sold listing snapshots. Only completed-order buyers can submit one review per order.
 - Notifications are visible and editable only by their recipient.
 - Reports are insert-only for verified users. Only verified admins can read or resolve the moderation queue.
 - Notifications and orders are added to Supabase Realtime.
 
-Checkout currently simulates PayFast/SnapScan. A production payment status must be written by a verified webhook Edge Function using the service role; the browser is intentionally unable to mark an order paid.
+Checkout currently uses the explicit `sandbox` value in the private `private.runtime_settings` table. The browser can complete only its own pending order through `complete_sandbox_payment`; direct order writes are revoked. Before accepting real money, deploy a provider-specific Edge Function that verifies PayFast/SnapScan signatures and amounts, writes payment status with the service role, and change `payments_mode` to `live`. The sandbox function then refuses payment completion automatically.
 
 ## Local database verification
 
