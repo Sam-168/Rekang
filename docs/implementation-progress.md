@@ -26,9 +26,9 @@ Implemented on the `develop` branch:
 - `/listings/:listingId/edit` — prefilled listing editor and update success state
 - `/cart` — empty state, cart lines, quantity limits, removal and running totals
 
-`src/lib/listings.ts` is the temporary listing query/write adapter. `MarketplaceProvider` holds filters and cart state while Supabase is unavailable. Supabase queries and persisted cart storage can replace these boundaries without changing the screen components.
+`src/lib/listings.ts` and `MarketplaceProvider` were connected to Supabase in Batch 7. Listing queries, seller profiles, product images and each authenticated user’s cart now persist in the hosted project.
 
-The generated product photography sheet in `src/assets/product-photography.png` supplies realistic development imagery. Production listing records will use Supabase Storage URLs instead.
+The generated product photography sheet in `src/assets/product-photography.png` remains as fallback imagery for local order demos. Live listing records use public Supabase Storage URLs.
 
 Routes for checkout, community, account, and seller profiles currently show explicit handoff placeholders instead of redirecting into an unrelated flow.
 
@@ -107,4 +107,19 @@ Implemented on the `develop` branch:
 - Vendor accounts remain pending for manual review after their email is confirmed
 - Removed the local verification and administrator preview shortcuts
 
-`supabase/migrations/202610050001_auth_profile_verification.sql` is applied to the hosted project. Remote verification confirmed both authentication functions and both `auth.users` triggers. Marketplace, orders, community, notifications and reporting still use their local adapters and are the remaining Supabase integration work.
+`supabase/migrations/202610050001_auth_profile_verification.sql` is applied to the hosted project. Remote verification confirmed both authentication functions and both `auth.users` triggers.
+
+## Batch 7 — Supabase marketplace integration
+
+Implemented on the `develop` branch:
+
+- Live listing feed queries with campus, category, price and text filtering
+- Database-backed listing details, creation, ownership-checked editing and seller profiles
+- Up to five listing images stored under owner/listing paths in the public `listing-images` bucket
+- Public Storage URLs with the original product sheet retained as fallback imagery for local order demos
+- Persistent per-user carts with add, remove, quantity, clear, loading, retry and optimistic feedback states
+- Cart and checkout summaries now resolve the same live listing records
+- Unverified profiles receive a verification-required state before the listing editor
+- Seller ratings, review counts and active-listing totals are loaded from database records
+
+End-to-end hosted verification used a disposable confirmed account to create a listing, upload an image, query the feed, persist and update a cart row, and then remove the listing, object and account. Production compilation, ESLint and whitespace checks also pass. Orders/payments, community/notifications and report moderation remain on local adapters.

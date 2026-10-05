@@ -61,7 +61,7 @@ The app will be available at `http://localhost:5173` by default.
 
 ## Current implementation
 
-The complete Controlled MVP screen set is implemented on the `develop` branch: authentication, marketplace/listings, cart/checkout, orders, seller profiles/reviews, community bulletins, notifications, reporting, and admin moderation. Authentication is connected to the hosted Supabase project; the remaining product areas still use reviewable local adapters while their database integration is completed.
+The complete Controlled MVP screen set is implemented on the `develop` branch: authentication, marketplace/listings, cart/checkout, orders, seller profiles/reviews, community bulletins, notifications, reporting, and admin moderation. Authentication, marketplace listings, product-image Storage, seller profiles and carts are connected to the hosted Supabase project; orders, community and moderation still use reviewable local adapters while their database integration is completed.
 
 The Supabase schema, migrations, storage buckets, Realtime tables, database constraints, RLS policies, and authentication triggers are applied to the hosted project. See [`docs/supabase-setup.md`](docs/supabase-setup.md) for the setup and security model, and [`docs/implementation-progress.md`](docs/implementation-progress.md) for route and verification coverage.
 

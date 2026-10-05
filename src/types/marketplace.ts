@@ -1,6 +1,18 @@
 export const categories = ['All', 'Books', 'Electronics', 'Home', 'Services'] as const
 export type ListingCategory = Exclude<(typeof categories)[number], 'All'>
 
+export type Seller = {
+  id: string
+  name: string
+  initials: string
+  verified: boolean
+  role: 'student' | 'faculty' | 'vendor' | 'resident' | 'admin'
+  campus: string
+  avatarUrl: string | null
+  rating: number
+  reviews: number
+}
+
 export type Listing = {
   id: string
   title: string
@@ -8,15 +20,10 @@ export type Listing = {
   price: number
   category: ListingCategory
   campus: string
-  seller: {
-    id: string
-    name: string
-    initials: string
-    verified: boolean
-    rating: number
-    reviews: number
-  }
+  seller: Seller
   imageIndex: number
+  imageUrl: string | null
+  imagePaths: string[]
   status: 'available' | 'sold'
   condition: string
   postedLabel: string

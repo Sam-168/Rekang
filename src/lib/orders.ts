@@ -1,4 +1,4 @@
-import { listings } from './listings'
+import { listingService, listings } from './listings'
 import type { CartLine, Order, PaymentGateway, Review } from '../types/marketplace'
 
 const orders: Order[] = [
@@ -18,8 +18,9 @@ export const orderService = {
   async create(cart: CartLine[], gateway: PaymentGateway) {
     await wait(650)
     const first = cart[0]
-    const listing = listings.find((item) => item.id === first?.listingId)
+    const listing = first ? (listings.find((item) => item.id === first.listingId) ?? await listingService.findById(first.listingId)) : null
     if (!first || !listing) throw new Error('Your cart no longer contains an available listing.')
+    if (!listings.some((item) => item.id === listing.id)) listings.push(listing)
     const order: Order = {
       id: `RK-${1050 + orders.length}`,
       listingId: first.listingId,
