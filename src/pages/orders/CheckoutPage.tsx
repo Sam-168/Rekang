@@ -5,19 +5,18 @@ import { Notice } from '../../components/auth/Notice'
 import { EmptyState } from '../../components/marketplace/EmptyState'
 import { OrderLine } from '../../components/orders/OrderLine'
 import { useMarketplace } from '../../context/useMarketplace'
-import { listings } from '../../lib/listings'
 import { orderService } from '../../lib/orders'
 import type { PaymentGateway } from '../../types/marketplace'
 
 export function CheckoutPage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
-  const { cart, clearCart } = useMarketplace()
+  const { cart, cartListings, clearCart } = useMarketplace()
   const [gateway, setGateway] = useState<PaymentGateway>('payfast')
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState(params.get('state') === 'failed' ? 'Payment wasn’t completed. No payment was taken. Try again or choose another method.' : '')
   const lines = cart.flatMap((line) => {
-    const listing = listings.find((item) => item.id === line.listingId)
+    const listing = cartListings[line.listingId]
     return listing ? [{ ...line, listing }] : []
   })
   const total = lines.reduce((sum, line) => sum + line.listing.price * line.quantity, 0)
@@ -28,7 +27,7 @@ export function CheckoutPage() {
     setProcessing(true)
     try {
       const order = await orderService.create(cart, gateway)
-      clearCart()
+      await clearCart()
       navigate(`/orders/${order.id}/confirmation`)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Payment could not be started.')

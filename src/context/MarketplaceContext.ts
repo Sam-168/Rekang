@@ -1,14 +1,18 @@
 import { createContext } from 'react'
-import type { CartLine, ListingFilters } from '../types/marketplace'
+import type { CartLine, Listing, ListingFilters } from '../types/marketplace'
 
 export type MarketplaceState = {
   filters: ListingFilters
   setFilters: (filters: ListingFilters) => void
   cart: CartLine[]
-  addToCart: (listingId: string) => void
-  removeFromCart: (listingId: string) => void
-  setQuantity: (listingId: string, quantity: number) => void
-  clearCart: () => void
+  cartListings: Record<string, Listing>
+  cartLoading: boolean
+  cartError: string
+  addToCart: (listingId: string) => Promise<void>
+  removeFromCart: (listingId: string) => Promise<void>
+  setQuantity: (listingId: string, quantity: number) => Promise<void>
+  clearCart: () => Promise<void>
+  reloadCart: () => Promise<void>
   cartCount: number
 }
 

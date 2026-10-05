@@ -3,13 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { EmptyState } from '../../components/marketplace/EmptyState'
 import { ProductImage } from '../../components/marketplace/ProductImage'
 import { useMarketplace } from '../../context/useMarketplace'
-import { listings } from '../../lib/listings'
+import { Notice } from '../../components/auth/Notice'
 
 export function CartPage() {
   const navigate = useNavigate()
-  const { cart, removeFromCart, setQuantity } = useMarketplace()
+  const { cart, cartListings, cartLoading, cartError, removeFromCart, setQuantity, reloadCart } = useMarketplace()
   const lines = cart.flatMap((line) => {
-    const listing = listings.find((item) => item.id === line.listingId)
+    const listing = cartListings[line.listingId]
     return listing ? [{ ...line, listing }] : []
   })
   const total = lines.reduce((sum, line) => sum + line.listing.price * line.quantity, 0)
@@ -22,13 +22,14 @@ export function CartPage() {
           <p className="eyebrow">Your selection</p>
           <h1>Your cart.</h1>
           <p className="page-copy">Confirm your items before checkout.</p>
-          {lines.length === 0 ? (
+          {cartError && <Notice error>{cartError}<button className="text-link text-link--button" type="button" onClick={() => void reloadCart()}>Try again</button></Notice>}
+          {cartLoading ? <div className="order-list-loading" aria-busy="true"><span /><span /></div> : lines.length === 0 ? (
             <EmptyState title="Your cart is empty.">Find something useful from someone nearby.<Link className="button button--primary" to="/home">Browse marketplace</Link></EmptyState>
           ) : lines.map(({ listing, quantity }) => (
             <article className="cart-item" key={listing.id}>
-              <ProductImage index={listing.imageIndex} alt={listing.title} />
-              <div className="cart-item__copy"><Link to={`/listings/${listing.id}`}>{listing.title}</Link><span>{listing.seller.name} · {listing.campus}</span><strong>R {listing.price.toLocaleString('en-ZA')}</strong><div className="quantity-control"><button type="button" onClick={() => setQuantity(listing.id, quantity - 1)} disabled={quantity === 1} aria-label={`Decrease ${listing.title} quantity`}><Minus size={15} /></button><span>{quantity}</span><button type="button" onClick={() => setQuantity(listing.id, quantity + 1)} disabled={quantity === 5} aria-label={`Increase ${listing.title} quantity`}><Plus size={15} /></button></div></div>
-              <button className="remove-button" type="button" aria-label={`Remove ${listing.title}`} onClick={() => removeFromCart(listing.id)}><Trash2 size={17} /></button>
+              <ProductImage index={listing.imageIndex} imageUrl={listing.imageUrl} alt={listing.title} />
+              <div className="cart-item__copy"><Link to={`/listings/${listing.id}`}>{listing.title}</Link><span>{listing.seller.name} · {listing.campus}</span><strong>R {listing.price.toLocaleString('en-ZA')}</strong><div className="quantity-control"><button type="button" onClick={() => void setQuantity(listing.id, quantity - 1)} disabled={quantity === 1} aria-label={`Decrease ${listing.title} quantity`}><Minus size={15} /></button><span>{quantity}</span><button type="button" onClick={() => void setQuantity(listing.id, quantity + 1)} disabled={quantity === 5} aria-label={`Increase ${listing.title} quantity`}><Plus size={15} /></button></div></div>
+              <button className="remove-button" type="button" aria-label={`Remove ${listing.title}`} onClick={() => void removeFromCart(listing.id)}><Trash2 size={17} /></button>
             </article>
           ))}
         </section>
