@@ -3,6 +3,7 @@ import { ArrowRight, CalendarDays, MapPin, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { bulletinService } from '../../lib/community'
 import { bulletinCategories, type BulletinFilter, type BulletinPost } from '../../types/community'
+import { Notice } from '../../components/auth/Notice'
 
 const dateLabel = (date: string) => new Intl.DateTimeFormat('en-ZA', { day: 'numeric', month: 'short' }).format(new Date(`${date}T12:00:00`))
 
@@ -10,12 +11,14 @@ export function BulletinBoardPage() {
   const [posts, setPosts] = useState<BulletinPost[]>([])
   const [filter, setFilter] = useState<BulletinFilter>('All')
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [version, setVersion] = useState(0)
 
   useEffect(() => {
     let active = true
-    bulletinService.list().then((items) => { if (active) { setPosts(items); setLoading(false) } })
+    bulletinService.list().then((items) => { if (active) { setPosts(items); setLoading(false) } }).catch((cause) => { if (active) { setError(cause instanceof Error ? cause.message : 'Community posts could not be loaded.'); setLoading(false) } })
     return () => { active = false }
-  }, [])
+  }, [version])
 
   const visiblePosts = useMemo(() => filter === 'All' ? posts : posts.filter((post) => post.category === filter), [filter, posts])
 
@@ -29,6 +32,8 @@ export function BulletinBoardPage() {
         </div>
         <Link className="button button--primary" to="/community/new"><Plus size={17} /> Create post</Link>
       </section>
+
+      {error && <Notice error>{error}<button className="text-link text-link--button" type="button" onClick={() => { setError(''); setLoading(true); setVersion((value) => value + 1) }}>Try again</button></Notice>}
 
       <div className="bulletin-tabs" role="tablist" aria-label="Filter bulletin posts">
         {bulletinCategories.map((category) => (

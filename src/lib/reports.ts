@@ -1,29 +1,87 @@
+import { supabase } from './supabase'
 import type { Report, ReportReason, ReportStatus, ReportTargetType } from '../types/trust'
 
-const reports: Report[] = [
-  { id: 'REP-104', targetType: 'listing', targetId: 'student-laptop', targetLabel: 'Student laptop', reason: 'Suspicious or misleading', details: 'The price changed after I asked to collect it, and the seller requested an off-platform deposit.', reporterName: 'Lerato Dube', createdAt: '2026-10-04T09:24:00+02:00', status: 'open' },
-  { id: 'REP-103', targetType: 'profile', targetId: 'thabo', targetLabel: 'Thabo Molefe', reason: 'Spam', details: 'Repeated messages about unrelated services.', reporterName: 'Aisha Jacobs', createdAt: '2026-10-03T15:40:00+02:00', status: 'open' },
-  { id: 'REP-102', targetType: 'listing', targetId: 'headphones', targetLabel: 'Wireless headphones', reason: 'Prohibited item', details: 'Reviewed and confirmed that the listing is allowed.', reporterName: 'Current user', createdAt: '2026-10-02T12:10:00+02:00', status: 'dismissed', resolutionNote: 'No policy violation found.' },
-  { id: 'REP-101', targetType: 'profile', targetId: 'legacy-account', targetLabel: 'Removed account', reason: 'Harassment or abuse', details: 'Sent abusive messages after an order was cancelled.', reporterName: 'Naledi Mokoena', createdAt: '2026-10-01T08:30:00+02:00', status: 'resolved', resolutionNote: 'Account suspended after review.' },
-]
+type ReportRecord = {
+  id: string
+  reporter_id: string
+  target_type: ReportTargetType
+  target_id: string
+  reason: ReportReason
+  details: string
+  status: ReportStatus
+  resolution_note: string
+  created_at: string
+}
 
-const wait = (milliseconds = 280) => new Promise((resolve) => window.setTimeout(resolve, milliseconds))
+function requireClient() {
+  if (!supabase) throw new Error('Supabase is not configured for this environment.')
+  return supabase
+}
+
+function readableError(error: { message: string }) {
+  if (error.message.includes('already have an open report') || error.message.includes('duplicate key')) return 'You already have an open report for this item.'
+  if (error.message.includes('Administrator access')) return 'Administrator access is required.'
+  if (error.message.includes('Verify your account')) return 'Verify your account before sending a report.'
+  return error.message
+}
+
+async function mapReports(records: ReportRecord[]) {
+  if (!records.length) return []
+  const client = requireClient()
+  const reporterIds = [...new Set(records.map((report) => report.reporter_id))]
+  const listingIds = records.filter((report) => report.target_type === 'listing').map((report) => report.target_id)
+  const profileIds = records.filter((report) => report.target_type === 'profile').map((report) => report.target_id)
+  const [{ data: reporters, error: reporterError }, listingResult, profileResult] = await Promise.all([
+    client.from('profiles').select('id, full_name').in('id', reporterIds),
+    listingIds.length ? client.from('listings').select('id, title').in('id', listingIds) : Promise.resolve({ data: [], error: null }),
+    profileIds.length ? client.from('profiles').select('id, full_name').in('id', profileIds) : Promise.resolve({ data: [], error: null }),
+  ])
+  if (reporterError || listingResult.error || profileResult.error) throw new Error(readableError(reporterError ?? listingResult.error ?? profileResult.error!))
+  const reporterNames = new Map((reporters ?? []).map((profile) => [profile.id, profile.full_name]))
+  const listingNames = new Map((listingResult.data ?? []).map((listing) => [listing.id, listing.title]))
+  const profileNames = new Map((profileResult.data ?? []).map((profile) => [profile.id, profile.full_name]))
+  return records.map<Report>((record) => ({
+    id: record.id,
+    targetType: record.target_type,
+    targetId: record.target_id,
+    targetLabel: record.target_type === 'listing' ? listingNames.get(record.target_id) ?? 'Removed listing' : profileNames.get(record.target_id) ?? 'Removed profile',
+    reason: record.reason,
+    details: record.details,
+    reporterName: reporterNames.get(record.reporter_id) ?? 'Former member',
+    createdAt: record.created_at,
+    status: record.status,
+    resolutionNote: record.resolution_note || undefined,
+  }))
+}
 
 export const reportService = {
-  async list() { await wait(); return [...reports] },
-  async create(input: { targetType: ReportTargetType; targetId: string; targetLabel: string; reason: ReportReason; details: string }) {
-    await wait(460)
-    if (reports.some((report) => report.targetId === input.targetId && report.reporterName === 'Current user' && report.status === 'open')) throw new Error('You already have an open report for this item.')
-    const report: Report = { ...input, id: `REP-${105 + reports.length}`, reporterName: 'Current user', createdAt: new Date().toISOString(), status: 'open' }
-    reports.unshift(report)
-    return report
+  async list() {
+    const client = requireClient()
+    const { data, error } = await client.from('reports').select('*').order('created_at', { ascending: false })
+    if (error) throw new Error(readableError(error))
+    return mapReports(data as ReportRecord[])
   },
+
+  async create(input: { targetType: ReportTargetType; targetId: string; targetLabel: string; reason: ReportReason; details: string }) {
+    const client = requireClient()
+    const { data, error } = await client.rpc('create_report', {
+      target_kind: input.targetType,
+      target_uuid: input.targetId,
+      report_reason: input.reason,
+      report_details: input.details,
+    })
+    if (error) throw new Error(readableError(error))
+    return (await mapReports([data as ReportRecord]))[0]
+  },
+
   async updateStatus(id: string, status: Exclude<ReportStatus, 'open'>, resolutionNote: string) {
-    await wait(360)
-    const report = reports.find((item) => item.id === id)
-    if (!report) throw new Error('Report not found.')
-    report.status = status
-    report.resolutionNote = resolutionNote
-    return { ...report }
+    const client = requireClient()
+    const { data, error } = await client.rpc('resolve_report', {
+      target_report_id: id,
+      next_status: status,
+      decision_note: resolutionNote,
+    })
+    if (error) throw new Error(readableError(error))
+    return (await mapReports([data as ReportRecord]))[0]
   },
 }
