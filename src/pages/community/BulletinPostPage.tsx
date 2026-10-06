@@ -10,7 +10,7 @@ export function BulletinPostPage() {
 
   useEffect(() => {
     let active = true
-    bulletinService.findById(postId).then((item) => { if (active) setPost(item) })
+    bulletinService.findById(postId).then((item) => { if (active) setPost(item) }).catch(() => { if (active) setPost(null) })
     return () => { active = false }
   }, [postId])
 

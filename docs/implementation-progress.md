@@ -30,7 +30,7 @@ Implemented on the `develop` branch:
 
 The generated product photography sheet in `src/assets/product-photography.png` remains as fallback imagery for local order demos. Live listing records use public Supabase Storage URLs.
 
-Routes for checkout, community, account, and seller profiles currently show explicit handoff placeholders instead of redirecting into an unrelated flow.
+Later batches replaced the original checkout, community, account and seller-profile handoff placeholders with complete Supabase-backed routes.
 
 ## Local test scenarios
 
@@ -76,7 +76,7 @@ Implemented on the `develop` branch:
 - `/community/new` — category-aware post form, preview/edit step and publishing flow
 - `/notifications` — order, review, community and account updates with unread state and mark-all action
 
-`src/lib/community.ts` is the temporary in-memory bulletin adapter. `CommunityProvider` owns local notification read state until Supabase Realtime and persisted notifications are connected.
+`src/lib/community.ts` and `CommunityProvider` were connected to Supabase in Batch 9. Posts and read state persist, while new notifications arrive through Supabase Realtime.
 
 Batch 4 verification covers desktop and 390 × 844 rendering, category filters, feed-to-detail navigation, draft retention through preview, post publishing, unread notification state and horizontal overflow.
 
@@ -137,3 +137,16 @@ Implemented on the `develop` branch:
 - Removed direct browser inserts and updates for orders and order items; clients use audited database functions
 
 `supabase/migrations/202610050002_orders_payments.sql` is applied to the hosted project. A rollback-only hosted test passed checkout total calculation, cart clearing, inventory reservation, sandbox payment, seller and buyer transitions, final sold state, and review creation without retaining test data. Production compilation, ESLint and whitespace checks pass.
+
+## Batch 9 — Supabase community and administration integration
+
+Implemented on the `develop` branch:
+
+- Campus-scoped bulletin feed, detail queries and verified-member publishing backed by `bulletin_posts`
+- Persisted notification inbox, optimistic read state, mark-all support and Supabase Realtime refreshes
+- Event-generated notifications for new campus posts, order status changes, reviews and account verification
+- Server-controlled report creation with target validation and duplicate-open-report protection
+- Admin-only moderation queue with server-controlled resolve/dismiss decisions, resolver identity, timestamp and internal note
+- Revoked direct report inserts and updates so clients use the audited database functions
+
+`supabase/migrations/202610060001_community_moderation.sql` is applied to the hosted project. A rollback-only hosted test passed community publishing, generated notifications, report creation, duplicate protection and administrator resolution without retaining test data. The complete MVP now uses Supabase rather than local data adapters.

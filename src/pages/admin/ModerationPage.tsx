@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { reportService } from '../../lib/reports'
 import type { Report, ReportStatus } from '../../types/trust'
 import { useAuth } from '../../context/useAuth'
+import { Notice } from '../../components/auth/Notice'
 
 type Filter = 'all' | ReportStatus
 const filters: { value: Filter; label: string }[] = [{ value: 'all', label: 'All reports' }, { value: 'open', label: 'Open' }, { value: 'resolved', label: 'Resolved' }, { value: 'dismissed', label: 'Dismissed' }]
@@ -24,20 +25,29 @@ function ModerationDashboard() {
   const [selected, setSelected] = useState<Report | null>(null)
   const [note, setNote] = useState('')
   const [saving, setSaving] = useState(false)
-  useEffect(() => { reportService.list().then(setReports) }, [])
+  const [error, setError] = useState('')
+  const [version, setVersion] = useState(0)
+  useEffect(() => {
+    reportService.list().then(setReports).catch((cause) => { setReports([]); setError(cause instanceof Error ? cause.message : 'Reports could not be loaded.') })
+  }, [version])
   const visible = useMemo(() => reports?.filter((report) => filter === 'all' || report.status === filter) ?? [], [filter, reports])
   const openCount = reports?.filter((report) => report.status === 'open').length ?? 0
 
   async function decide(status: 'resolved' | 'dismissed') {
     if (!selected) return
-    setSaving(true)
-    const updated = await reportService.updateStatus(selected.id, status, note.trim() || (status === 'resolved' ? 'Action taken after review.' : 'No policy violation found.'))
-    setReports((current) => current?.map((item) => item.id === updated.id ? updated : item) ?? null)
-    setSelected(updated); setNote(''); setSaving(false)
+    setSaving(true); setError('')
+    try {
+      const updated = await reportService.updateStatus(selected.id, status, note.trim() || (status === 'resolved' ? 'Action taken after review.' : 'No policy violation found.'))
+      setReports((current) => current?.map((item) => item.id === updated.id ? updated : item) ?? null)
+      setSelected(updated); setNote('')
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'The moderation decision could not be saved.')
+    } finally { setSaving(false) }
   }
 
   return <div className="moderation-page">
     <header className="moderation-heading"><div><p className="eyebrow">Trust & safety</p><h1>Moderation queue.</h1><p>Review community reports and record a clear outcome.</p></div><div className="moderation-count"><strong>{openCount}</strong><span>Open reports</span></div></header>
+    {error && <Notice error>{error}<button className="text-link text-link--button" type="button" onClick={() => { setReports(null); setError(''); setVersion((value) => value + 1) }}>Try again</button></Notice>}
     <nav className="moderation-filters" aria-label="Filter reports">{filters.map((item) => <button key={item.value} className={filter === item.value ? 'is-active' : ''} type="button" onClick={() => setFilter(item.value)}>{item.label}{item.value === 'open' && <span>{openCount}</span>}</button>)}</nav>
     <div className="moderation-layout">
       <section className="report-queue" aria-live="polite">{reports === null ? <div className="queue-loading"><i /><i /><i /></div> : visible.length ? visible.map((report) => <button key={report.id} type="button" className={`queue-row${selected?.id === report.id ? ' is-selected' : ''}`} onClick={() => { setSelected(report); setNote('') }}><span className={`status-dot status-dot--${report.status}`} /><span><small>{report.id} · {report.targetType}</small><strong>{report.targetLabel}</strong><span>{report.reason}</span><time>{new Intl.DateTimeFormat('en-ZA', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(report.createdAt))}</time></span><ChevronRight size={17} /></button>) : <div className="queue-empty"><Check size={23} /><strong>No {filter === 'all' ? '' : filter} reports.</strong><span>The queue is clear.</span></div>}</section>

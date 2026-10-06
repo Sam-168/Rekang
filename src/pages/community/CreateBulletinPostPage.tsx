@@ -3,6 +3,9 @@ import { ArrowLeft, CalendarDays, Check, MapPin } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { bulletinService } from '../../lib/community'
 import { bulletinCategories, type BulletinCategory } from '../../types/community'
+import { Notice } from '../../components/auth/Notice'
+import { EmptyState } from '../../components/marketplace/EmptyState'
+import { useAuth } from '../../context/useAuth'
 
 type Draft = { title: string; category: BulletinCategory; body: string; eventDate: string; eventTime: string; location: string }
 const initialDraft: Draft = { title: '', category: 'Events', body: '', eventDate: '', eventTime: '', location: '' }
@@ -10,18 +13,28 @@ const displayDate = (date: string) => new Intl.DateTimeFormat('en-ZA', { weekday
 
 export function CreateBulletinPostPage() {
   const navigate = useNavigate()
+  const { profile } = useAuth()
   const [draft, setDraft] = useState(initialDraft)
   const [previewing, setPreviewing] = useState(false)
   const [publishing, setPublishing] = useState(false)
+  const [error, setError] = useState('')
   const hasEvent = draft.category !== 'Announcements'
 
   function update<K extends keyof Draft>(key: K, value: Draft[K]) { setDraft((current) => ({ ...current, [key]: value })) }
   function submit(event: FormEvent) { event.preventDefault(); setPreviewing(true); window.scrollTo({ top: 0, behavior: 'smooth' }) }
   async function publish() {
+    setError('')
     setPublishing(true)
-    const post = await bulletinService.create({ title: draft.title.trim(), category: draft.category, body: draft.body.trim(), eventDate: hasEvent ? draft.eventDate : undefined, eventTime: hasEvent ? draft.eventTime : undefined, location: hasEvent ? draft.location.trim() : undefined })
-    navigate(`/community/${post.id}`, { replace: true })
+    try {
+      const post = await bulletinService.create({ title: draft.title.trim(), category: draft.category, body: draft.body.trim(), eventDate: hasEvent ? draft.eventDate : undefined, eventTime: hasEvent ? draft.eventTime : undefined, location: hasEvent ? draft.location.trim() : undefined })
+      navigate(`/community/${post.id}`, { replace: true })
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'The post could not be published.')
+      setPublishing(false)
+    }
   }
+
+  if (!profile?.verified) return <div className="task-page"><EmptyState title="Verify your account first.">Only verified members can create community posts.<Link className="button button--primary" to="/verify">Check verification status</Link></EmptyState></div>
 
   if (previewing) return (
     <div className="editor-page community-editor community-preview">
@@ -29,7 +42,7 @@ export function CreateBulletinPostPage() {
       <p className="eyebrow">Preview</p><h1>{draft.title}</h1><span className="bulletin-category">{draft.category}</span>
       {hasEvent && <section className="event-panel"><div><CalendarDays size={19} /><span><small>When</small><strong>{displayDate(draft.eventDate)} at {draft.eventTime}</strong></span></div><div><MapPin size={19} /><span><small>Where</small><strong>{draft.location}</strong></span></div></section>}
       <p className="community-preview__body">{draft.body}</p>
-      <div className="community-editor__actions"><button className="button button--secondary" type="button" onClick={() => setPreviewing(false)}>Keep editing</button><button className="button button--primary" type="button" disabled={publishing} onClick={publish}><Check size={17} /> {publishing ? 'Publishing…' : 'Publish post'}</button></div>
+      {error && <Notice error>{error}</Notice>}<div className="community-editor__actions"><button className="button button--secondary" type="button" onClick={() => setPreviewing(false)}>Keep editing</button><button className="button button--primary" type="button" disabled={publishing} onClick={publish}><Check size={17} /> {publishing ? 'Publishing…' : 'Publish post'}</button></div>
     </div>
   )
 
