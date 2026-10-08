@@ -6,7 +6,7 @@ import { EmptyState } from '../../components/marketplace/EmptyState'
 import { OrderLine } from '../../components/orders/OrderLine'
 import { OrderStatusBadge } from '../../components/orders/OrderStatusBadge'
 import { useAuth } from '../../context/useAuth'
-import { orderService } from '../../lib/orders'
+import { orderService, payFastCheckoutEnabled, submitPaymentRedirect } from '../../lib/orders'
 import type { Order, OrderStatus } from '../../types/marketplace'
 
 export function OrderDetailPage() {
@@ -27,8 +27,13 @@ export function OrderDetailPage() {
 
   async function retryPayment() {
     setError(''); setSaving(true)
-    try { setOrder(await orderService.completeSandboxPayment(orderId)) }
-    catch (caught) { setError(caught instanceof Error ? caught.message : 'The sandbox payment could not be completed.') }
+    try {
+      if (!order) return
+      const result = await orderService.retryPayment(orderId, order.gateway)
+      if (result.kind === 'redirect') submitPaymentRedirect(result.payment)
+      else setOrder(result.order)
+    }
+    catch (caught) { setError(caught instanceof Error ? caught.message : 'The payment could not be started.') }
     finally { setSaving(false) }
   }
 
@@ -46,7 +51,7 @@ export function OrderDetailPage() {
       <div className="order-detail-grid"><section><h2>Collection</h2><p><MapPin size={16} />Bellville campus library</p><span>Collector: {order.collectionName} · {order.collectionPhone}</span>{order.collectionNote && <span>{order.collectionNote}</span>}</section><section><h2>Payment</h2><p><ShieldCheck size={16} />{order.gateway === 'payfast' ? 'PayFast' : 'SnapScan'} sandbox</p><span>{order.status === 'pending_payment' ? 'Payment is still pending.' : 'Sandbox payment recorded · no real money charged.'}</span></section></div>
       <div className="order-total"><span>Total</span><strong>R {order.total.toLocaleString('en-ZA')}</strong></div>
       <div className="order-actions">
-        {buyer && order.status === 'pending_payment' && <><button className="button button--primary" type="button" disabled={saving} onClick={retryPayment}>Complete sandbox payment</button><button className="button button--secondary" type="button" disabled={saving} onClick={() => void advance('cancelled')}>Cancel order</button></>}
+        {buyer && order.status === 'pending_payment' && <><button className="button button--primary" type="button" disabled={saving} onClick={retryPayment}>{payFastCheckoutEnabled ? 'Continue to PayFast' : 'Complete sandbox payment'}</button><button className="button button--secondary" type="button" disabled={saving} onClick={() => void advance('cancelled')}>Cancel order</button></>}
         {seller && order.status === 'paid' && <button className="button button--primary" type="button" disabled={saving} onClick={() => void advance('ready_for_collection')}>Mark ready for collection</button>}
         {buyer && order.status === 'ready_for_collection' && <button className="button button--primary" type="button" disabled={saving} onClick={() => void advance('completed')}>Confirm collection</button>}
         {reviewable ? <Link className="button button--primary" to={`/orders/${order.id}/review`}>Leave a review</Link> : order.status === 'completed' && order.reviewed ? <p className="review-note">A review has already been submitted for this purchase.</p> : buyer ? <p className="review-note">You can leave a review after the order is completed.</p> : null}

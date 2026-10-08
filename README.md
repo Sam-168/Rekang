@@ -63,6 +63,25 @@ The app will be available at `http://localhost:5173` by default.
 
 The complete Controlled MVP screen set is implemented on the `develop` branch: authentication, marketplace/listings, cart/checkout, orders, seller profiles/reviews, community bulletins, notifications, reporting, and admin moderation. Every MVP feature is connected to the hosted Supabase project, including Auth, Postgres, Storage, Realtime notifications, row-level security, checkout functions and moderation workflows.
 
+### PayFast checkout
+
+Checkout remains in the database sandbox by default. The repository also includes a PayFast redirect integration backed by two Supabase Edge Functions: `create-payfast-checkout` signs the browser redirect and `payfast-itn` verifies the provider notification before marking an order paid.
+
+Set these Supabase secrets before deploying the functions:
+
+```bash
+supabase secrets set \
+  PAYFAST_MERCHANT_ID=your-sandbox-merchant-id \
+  PAYFAST_MERCHANT_KEY=your-sandbox-merchant-key \
+  PAYFAST_PASSPHRASE=your-sandbox-passphrase \
+  APP_URL=https://rekang.vercel.app
+
+supabase functions deploy create-payfast-checkout
+supabase functions deploy payfast-itn --no-verify-jwt
+```
+
+Then set `VITE_PAYMENT_MODE=payfast` in Vercel and redeploy. This project is intentionally locked to PayFast's sandbox endpoints; it cannot initiate a live payment.
+
 The Supabase schema, migrations, storage buckets, Realtime tables, database constraints, RLS policies, and authentication triggers are applied to the hosted project. See [`docs/supabase-setup.md`](docs/supabase-setup.md) for the setup and security model, and [`docs/implementation-progress.md`](docs/implementation-progress.md) for route and verification coverage.
 
 ## Project Structure

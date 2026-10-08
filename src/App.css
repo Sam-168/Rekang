@@ -169,7 +169,7 @@
 .product-image--3 { background-position: 0% 100%; }
 .product-image--4 { background-position: 50% 100%; }
 .product-image--5 { background-position: 100% 100%; }
-.product-image--uploaded { background-position: center; background-size: cover; }
+.product-image--uploaded { background-position: center; background-size: contain; }
 .listing-card .product-image { aspect-ratio: 1.12; border-radius: 4px; transition: transform .2s ease; }
 .listing-card:hover .product-image { transform: translateY(-2px); }
 .listing-card__copy { display: grid; gap: 5px; padding-top: 11px; }
