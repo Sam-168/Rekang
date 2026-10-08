@@ -146,6 +146,8 @@ export const listings: Listing[] = [
 export const listingService = {
   async search(filters: ListingFilters) {
     const client = requireClient()
+    // Release stock left behind when a buyer abandons an external payment session.
+    await client.rpc('expire_pending_orders')
     let query = client.from('listings').select(listingSelection)
       .eq('status', 'available')
       .eq('campus', filters.campus)

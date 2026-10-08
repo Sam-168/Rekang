@@ -1,6 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders, jsonResponse, optionsResponse } from '../_shared/cors.ts'
-import { processUrl, signature } from '../_shared/payfast.ts'
+import { processUrl } from '../_shared/payfast.ts'
 
 type CheckoutRequest = { orderId?: string }
 
@@ -16,7 +16,6 @@ Deno.serve(async (request) => {
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
     const merchantId = Deno.env.get('PAYFAST_MERCHANT_ID')
     const merchantKey = Deno.env.get('PAYFAST_MERCHANT_KEY')
-    const passphrase = Deno.env.get('PAYFAST_PASSPHRASE') ?? ''
     const appUrl = (Deno.env.get('APP_URL') ?? '').replace(/\/$/, '')
     if (!merchantId || !merchantKey || !appUrl) {
       return jsonResponse({ error: 'PayFast is not configured yet.' }, 503)
@@ -56,7 +55,6 @@ Deno.serve(async (request) => {
       amount: Number(order.total).toFixed(2),
       item_name: `Rekang ${order.reference}`,
     }
-    fields.signature = signature(Object.entries(fields), passphrase)
     return jsonResponse({ processUrl, fields }, 200)
   } catch (error) {
     console.error(error)
