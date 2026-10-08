@@ -45,7 +45,7 @@ Deno.serve(async (request) => {
     const fields: Record<string, string> = {
       merchant_id: merchantId,
       merchant_key: merchantKey,
-      return_url: `${appUrl}/orders/${order.id}?payment=return`,
+      return_url: `${appUrl}/orders/${order.id}/confirmation?payment=return`,
       cancel_url: `${appUrl}/orders/${order.id}?payment=cancelled`,
       notify_url: `${supabaseUrl}/functions/v1/payfast-itn`,
       name_first: firstName,
