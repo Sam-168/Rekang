@@ -34,6 +34,10 @@ type CheckoutInput = {
   collectionNote: string
 }
 
+export type PaymentRedirect = { processUrl: string; fields: Record<string, string> }
+export type CheckoutResult = { kind: 'complete'; order: Order } | { kind: 'redirect'; payment: PaymentRedirect }
+export const payFastCheckoutEnabled = import.meta.env.VITE_PAYMENT_MODE === 'payfast'
+
 function requireClient() {
   if (!supabase) throw new Error('Supabase is not configured for this environment.')
   return supabase
@@ -106,8 +110,33 @@ async function findOrderRecord(id: string) {
   return data as OrderRecord | null
 }
 
+async function startPayFastCheckout(orderId: string): Promise<PaymentRedirect> {
+  const client = requireClient()
+  const { data, error } = await client.functions.invoke('create-payfast-checkout', { body: { orderId } })
+  if (error) throw new Error(`Order created, but PayFast could not be opened: ${error.message}`)
+  const payment = data as Partial<PaymentRedirect> & { error?: string }
+  if (payment.error || !payment.processUrl || !payment.fields) throw new Error(payment.error ?? 'PayFast did not return a checkout session.')
+  return { processUrl: payment.processUrl, fields: payment.fields }
+}
+
+export function submitPaymentRedirect(payment: PaymentRedirect) {
+  const form = document.createElement('form')
+  form.method = 'POST'
+  form.action = payment.processUrl
+  form.hidden = true
+  for (const [name, value] of Object.entries(payment.fields)) {
+    const input = document.createElement('input')
+    input.type = 'hidden'
+    input.name = name
+    input.value = value
+    form.appendChild(input)
+  }
+  document.body.appendChild(form)
+  form.submit()
+}
+
 export const orderService = {
-  async create(input: CheckoutInput) {
+  async create(input: CheckoutInput): Promise<CheckoutResult> {
     const client = requireClient()
     const { data: created, error: createError } = await client.rpc('create_order_from_cart', {
       checkout_gateway: input.gateway,
@@ -117,12 +146,15 @@ export const orderService = {
     })
     if (createError) throw new Error(readableError(createError))
     const orderId = (created as OrderRecord).id
+    if (payFastCheckoutEnabled && input.gateway === 'payfast') {
+      return { kind: 'redirect', payment: await startPayFastCheckout(orderId) }
+    }
     const { error: paymentError } = await client.rpc('complete_sandbox_payment', { target_order_id: orderId })
     if (paymentError) throw new Error(`Order created, but sandbox payment could not finish: ${readableError(paymentError)}`)
     const record = await findOrderRecord(orderId)
     const order = record ? (await hydrateOrders([record]))[0] : null
     if (!order) throw new Error('The order was created but could not be reloaded.')
-    return order
+    return { kind: 'complete', order }
   },
 
   async list(mode: 'buyer' | 'seller') {
@@ -186,5 +218,12 @@ export const orderService = {
     const order = record ? (await hydrateOrders([record]))[0] : null
     if (!order) throw new Error('The paid order could not be reloaded.')
     return order
+  },
+
+  async retryPayment(id: string, gateway: PaymentGateway): Promise<CheckoutResult> {
+    if (payFastCheckoutEnabled && gateway === 'payfast') {
+      return { kind: 'redirect', payment: await startPayFastCheckout(id) }
+    }
+    return { kind: 'complete', order: await this.completeSandboxPayment(id) }
   },
 }
