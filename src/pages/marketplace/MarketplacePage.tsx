@@ -5,6 +5,7 @@ import { EmptyState } from '../../components/marketplace/EmptyState'
 import { ListingCard } from '../../components/marketplace/ListingCard'
 import { LoadingListings } from '../../components/marketplace/LoadingListings'
 import { useMarketplace } from '../../context/useMarketplace'
+import { marketplaceMaxPrice } from '../../context/MarketplaceContext'
 import { listingService } from '../../lib/listings'
 import { categories, type Listing } from '../../types/marketplace'
 
@@ -42,7 +43,7 @@ export function MarketplacePage() {
     setQuery('')
     setLoading(true)
     setFailed(false)
-    setFilters({ query: '', category: 'All', minPrice: 0, maxPrice: 5000, campus: 'Bellville' })
+    setFilters({ query: '', category: 'All', minPrice: 0, maxPrice: marketplaceMaxPrice, campus: 'Bellville' })
   }
 
   return (
@@ -61,7 +62,7 @@ export function MarketplacePage() {
               <button key={category} className={filters.category === category ? 'is-active' : ''} type="button" onClick={() => selectCategory(category)}>{category}</button>
             ))}
           </div>
-          <Link className="filter-link" to="/filters"><SlidersHorizontal size={17} />Filters{(filters.minPrice > 0 || filters.maxPrice < 5000) && <span />}</Link>
+          <Link className="filter-link" to="/filters"><SlidersHorizontal size={17} />Filters{(filters.minPrice > 0 || filters.maxPrice < marketplaceMaxPrice) && <span />}</Link>
         </div>
       </section>
 

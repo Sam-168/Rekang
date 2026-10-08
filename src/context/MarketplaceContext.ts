@@ -16,5 +16,6 @@ export type MarketplaceState = {
   cartCount: number
 }
 
-export const defaultFilters: ListingFilters = { query: '', category: 'All', minPrice: 0, maxPrice: 5000, campus: 'Bellville' }
+export const marketplaceMaxPrice = 100_000
+export const defaultFilters: ListingFilters = { query: '', category: 'All', minPrice: 0, maxPrice: marketplaceMaxPrice, campus: 'Bellville' }
 export const MarketplaceContext = createContext<MarketplaceState | null>(null)
