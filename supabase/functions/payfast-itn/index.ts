@@ -20,10 +20,9 @@ Deno.serve(async (request) => {
   try {
     const rawBody = await request.text()
     const posted = new URLSearchParams(rawBody)
-    const passphrase = Deno.env.get('PAYFAST_PASSPHRASE') ?? ''
     const merchantId = Deno.env.get('PAYFAST_MERCHANT_ID')
     if (!merchantId || posted.get('merchant_id') !== merchantId) return textResponse('Invalid merchant', 400)
-    if (posted.get('signature') !== signature(posted.entries(), passphrase)) return textResponse('Invalid signature', 400)
+    if (posted.get('signature') !== signature(posted.entries(), '')) return textResponse('Invalid signature', 400)
     if (!(await validSource(request))) return textResponse('Invalid source', 400)
 
     const validationBody = parameterString(posted.entries(), '')

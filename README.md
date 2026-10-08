@@ -73,7 +73,6 @@ Set these Supabase secrets before deploying the functions:
 supabase secrets set \
   PAYFAST_MERCHANT_ID=your-sandbox-merchant-id \
   PAYFAST_MERCHANT_KEY=your-sandbox-merchant-key \
-  PAYFAST_PASSPHRASE=your-sandbox-passphrase \
   APP_URL=https://rekang.vercel.app
 
 supabase functions deploy create-payfast-checkout
@@ -81,6 +80,8 @@ supabase functions deploy payfast-itn --no-verify-jwt
 ```
 
 Then set `VITE_PAYMENT_MODE=payfast` in Vercel and redeploy. This project is intentionally locked to PayFast's sandbox endpoints; it cannot initiate a live payment.
+
+The shared PayFast sandbox merchant currently accepts unsigned once-off checkout requests. The ITN handler still validates PayFast's notification signature, source address, merchant ID and order amount before marking an order paid.
 
 The Supabase schema, migrations, storage buckets, Realtime tables, database constraints, RLS policies, and authentication triggers are applied to the hosted project. See [`docs/supabase-setup.md`](docs/supabase-setup.md) for the setup and security model, and [`docs/implementation-progress.md`](docs/implementation-progress.md) for route and verification coverage.
 

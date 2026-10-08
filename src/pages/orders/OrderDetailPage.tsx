@@ -1,6 +1,6 @@
 import { ArrowLeft, MapPin, ShieldCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Notice } from '../../components/auth/Notice'
 import { EmptyState } from '../../components/marketplace/EmptyState'
 import { OrderLine } from '../../components/orders/OrderLine'
@@ -11,12 +11,24 @@ import type { Order, OrderStatus } from '../../types/marketplace'
 
 export function OrderDetailPage() {
   const { orderId = '' } = useParams()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { user } = useAuth()
   const [order, setOrder] = useState<Order | null | undefined>(undefined)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   useEffect(() => { orderService.findById(orderId).then(setOrder).catch(() => setOrder(null)) }, [orderId])
+  useEffect(() => {
+    if (searchParams.get('payment') !== 'cancelled' || order?.status !== 'pending_payment' || order.buyerId !== user?.id) return
+    const timeout = window.setTimeout(() => {
+      setSaving(true)
+      orderService.advance(orderId, 'cancelled')
+        .then(setOrder)
+        .catch((caught) => setError(caught instanceof Error ? caught.message : 'The pending order could not be cancelled.'))
+        .finally(() => setSaving(false))
+    }, 0)
+    return () => window.clearTimeout(timeout)
+  }, [order, orderId, searchParams, user?.id])
 
   async function advance(status: Extract<OrderStatus, 'ready_for_collection' | 'completed' | 'cancelled'>) {
     setError(''); setSaving(true)
